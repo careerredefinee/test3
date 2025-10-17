@@ -158,9 +158,9 @@ const StatisticsSection = () => {
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
                 <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                 <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {formatNumber(counters.learners)}+
+                  {counters.learners}+
                 </div>
-                <div className="text-gray-600 font-medium">Learners Worldwide</div>
+                <div className="text-gray-600 font-medium">Learners </div>
               </div>
             </div>
 
