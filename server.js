@@ -1,13 +1,13 @@
-
 import dotenv from 'dotenv';
 
-// Always load .env in development or when NODE_ENV is undefined
-if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
+// Only load .env file when running locally (not in production/Render)
+if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: './.env' });
-  console.log('✅ .env file loaded (development mode)');
-} else {
-  console.log('🚀 Running in production mode, skipping .env load');
 }
+
+// Default MongoDB URI fallback embedded in server.js (used only if .env does not define MONGO_URI)
+const DEFAULT_MONGO_URI = "mongodb+srv://careerredefinee_db_user:AaBb12%4012@careerredefine.qqk8sno.mongodb.net/?retryWrites=true&w=majority&appName=careerredefine";
+const MONGO_URI = process.env.MONGO_URI || DEFAULT_MONGO_URI;
 
 import express from 'express';
 import cors from 'cors';
@@ -201,7 +201,7 @@ const sessionConfig = {
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URI,
+    mongoUrl: MONGO_URI,
     ttl: 14 * 24 * 60 * 60, // 14 days
     autoRemove: 'native',
     crypto: {
@@ -364,7 +364,7 @@ app.post('/api/v1/auth/reset-password-otp', authController.resetPasswordByOTP);
 app.post('/api/v1/auth/refresh-token', authController.refreshToken);
 app.post('/api/v1/auth/logout', authController.logout);
 // Protected auth routes
-app.get('/api/v1/auth/me', protect, authController.getMe);
+app.get('/api/v1/auth/me', protect, authController.getMe, getUser);
 app.patch('/api/v1/auth/update-me', protect, uploadUserPhoto, resizeUserPhoto, authController.updateMe);
 app.delete('/api/v1/auth/delete-me', protect, authController.deleteMe);
 app.patch('/api/v1/auth/update-password', protect, authController.updatePassword);
@@ -1103,7 +1103,7 @@ const connectDB = async () => {
     }
     
     console.log('Connecting to MongoDB...');
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
+    const conn = await mongoose.connect(MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000, // 5 seconds timeout
@@ -1111,7 +1111,7 @@ const connectDB = async () => {
     });
     
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    
+
     // Ensure admin user exists after successful connection
     await ensureAdminUser();
     // Ensure review indexes are correct for optional course reviews
