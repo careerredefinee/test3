@@ -1,10 +1,15 @@
+
 import dotenv from 'dotenv';
 
-// Only load .env file when running locally (not in production/Render)
-if (process.env.NODE_ENV !== 'production') {
+// Always load .env in development or when NODE_ENV is undefined
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: './.env' });
+  console.log('✅ .env file loaded (development mode)');
+} else {
+  console.log('🚀 Running in production mode, skipping .env load');
 }
 
+import express from 'express';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
