@@ -10,7 +10,6 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
 }
 
 import express from 'express';
-import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
