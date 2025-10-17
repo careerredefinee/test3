@@ -547,15 +547,20 @@ if (queryForm) {
     formData.forEach((value, key) => {
       formObject[key] = value;
     });
+
+    // If it's an interview form, ensure the time key is 'timeSlot' for the backend.
+    if (formObject.interview_time) {
+      formObject.timeSlot = formObject.interview_time;
+      delete formObject.interview_time;
+    }
     
     // Determine the endpoint based on form type
-    // Determine the endpoint based on form type
-const isInterviewForm = this.querySelector('input[name="interview_date"]') !== null;
-const endpoint = isInterviewForm 
-  ? 'http://testing.careerredefine.com/api/book-interview' 
-  : 'http://testing.careerredefine.com/api/book-interview';
+    const isInterviewForm = this.querySelector('input[name="interview_date"]') !== null;
+    const endpoint = isInterviewForm 
+      ? 'https://testing.careerredefine.com/api/book-interview' 
+      : 'https://testing.careerredefine.com/api/enquiry';
 
-    // Submit to Node.js backend
+    // Submit to Node.js backend (robust handling like datascience.html)
     fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -573,14 +578,13 @@ const endpoint = isInterviewForm
     })
     .then(({data, status, ok}) => {
       if (!(status === 200 || status === 201)) {
-  let msg = `Request failed with status ${status}`;
-  if (data && (data.message || data.error)) {
-    msg = data.message || data.error;
-  }
-  console.error('Server error:', msg);
-  throw new Error(msg);
-}
-
+        let msg = `Request failed with status ${status}`;
+        if (data && (data.message || data.error)) {
+          msg = data.message || data.error;
+        }
+        console.error('Server error:', msg);
+        throw new Error(msg);
+      }
       return data;
     })
     .then(data => {
@@ -589,13 +593,9 @@ const endpoint = isInterviewForm
       
       // Show success message in the appropriate card
       if (isInterviewForm) {
-        // For interview form, show success card with interview details
-        document.getElementById('successCard').style.display = 'block';
-        document.getElementById('successCard').querySelector('h3').textContent = 'Interview Scheduled Successfully!';
-        document.getElementById('successCard').querySelector('p').innerHTML = 
-          `Your interview has been scheduled for <strong>${formObject.interview_date} at ${formObject.interview_time}</strong>.<br><br>
-          We've sent the details to your email. Please check your inbox.`;
-        
+        // Use interview notification system
+        const msg = `Your interview has been scheduled for ${formObject.interview_date} at ${formObject.timeSlot}. We've sent the details to your email.`;
+        showInterviewNotification('success', msg);
         // Reset form and time slots for interview form
         this.reset();
         generateTimeSlots();
@@ -753,6 +753,36 @@ const endpoint = isInterviewForm
     </div>
   </div>
 </section>
+<!-- Hide legacy interview section if still present -->
+<script>
+  (function(){
+    const old = document.getElementById('interview-booking');
+    if (old) { old.style.display = 'none'; }
+  })();
+</script>
+
+<!-- Book Your Slot (Simplified) -->
+<section id="book-slot" style="padding: 60px 0; background: #f8fbff;">
+  <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+    <div class="section-header" style="text-align: center; margin-bottom: 28px;">
+      <h2 style="font-size: 2rem; color: #0d47a1; margin-bottom: 8px; font-weight: 800;">
+        <i class="bi bi-calendar-check-fill" style="margin-right: 8px;"></i>Book Your Slot
+      </h2>
+      <p style="font-size: 1rem; color: #555;">Share your details and preferred date & time. We'll confirm shortly.</p>
+    </div>
+
+    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); padding: 28px; max-width: 720px; margin: 0 auto; text-align:center;">
+      <a href="/support#booking" style="display:inline-block; background: linear-gradient(45deg,#0d47a1,#1976d2); color:#fff; text-decoration:none; padding:14px 32px; font-weight:800; border-radius:9999px; box-shadow:0 10px 24px rgba(13,71,161,0.25);">
+        Book a Slot
+      </a>
+      <div style="margin-top:8px; color:#6b7280; font-size:0.9rem;">After booking you will get confirmation mail shortly</div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Booking handled on /support#booking. Inline quick booking form removed.
+</script>
 <!-- Interview Success Card -->
 <div id="interviewSuccessCard" style="
   display:none; 
@@ -1072,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
         const formObject = Object.fromEntries(formData.entries());
         
-        const response = await fetch('http://testing.careerredefine.com/api/book-interview', {
+        const response = await fetch('https://testing.careerredefine.com/api/book-interview', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
