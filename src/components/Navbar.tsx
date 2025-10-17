@@ -15,7 +15,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, isLoading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -139,7 +139,7 @@ const Navbar = () => {
               )}
             </div>
             <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
+              {isLoading ? null : isAuthenticated ? (
                 <div className="flex items-center space-x-4">
                   <ProfileDropdown />
                 </div>
@@ -156,10 +156,10 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu button (push to far right) */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden ml-auto p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -175,16 +175,6 @@ const Navbar = () => {
         >
           <div className="flex flex-col space-y-3">
             {navItems.map((item) => renderNavItem(item, true))}
-            {/* Mobile: Login right after nav items (after 'About') */}
-            {!isAuthenticated && (
-              <Link
-                to="/login"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-50"
-                onClick={() => setIsOpen(false)}
-              >
-                Login
-              </Link>
-            )}
             {user?.isPremium && (
               <Link
                 to="/premium"
@@ -199,7 +189,7 @@ const Navbar = () => {
             
             {/* Auth section - always visible */}
             <div className="pt-3 border-t border-gray-200">
-              {isAuthenticated ? (
+              {isLoading ? null : isAuthenticated ? (
                 <>
                   <Link 
                     to="/profile" 
@@ -222,6 +212,13 @@ const Navbar = () => {
                 </>
               ) : (
                 <div className="flex flex-col space-y-3">
+                  <Link 
+                    to="/login"
+                    className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-50 text-center"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Login
+                  </Link>
                   <Link 
                     to="/register" 
                     className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-center shadow-md"
